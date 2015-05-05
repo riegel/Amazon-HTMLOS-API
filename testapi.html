@@ -1,0 +1,342 @@
+<<
+expand file="/system/clearimage/DLL.lib" /expand
+expand file="/apps/api/amazon/amazon.lib" /expand
+
+Amazon_all_tests_passed='ERROR'
+
+
+
+
+addunittest('AmazonAPI()','Verify private Amazon API function calls are working.',^
+ if isfile('/apps/api/amazon/amazon.lib') then expand file='/apps/api/amazon/amazon.lib' /expand /if
+ function test() locals x,commands do
+  if isfile('/apps/api/amazon/amazon.lib') then
+   COMMANDS='ERROR'
+   # echo    /#  COMMANDS=UNITTEST_cmd(commands,"trim(system('"+amazon_api_echo+" Terry Riegel'))","Terry Riegel")
+   # base64  /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_BASE64('Hello World')","SGVsbG8gV29ybGQ=")
+   # xxd     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_BASE64('HEX:48656c6c6f20576f726c64')","SGVsbG8gV29ybGQ=")
+   # xxd     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_ASHEX('Hello World')","HEX:48656c6c6f20576f726c64")
+   # xxd     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_HMAC_sha1('secretkey','Hello World')","HEX:4222bbf4506fb877932c94fa4b35784f58e76bfc")
+   # xxd     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_HMAC_sha256('secretkey','Hello World')","HEX:ce5cc4cf818ebb370d616baa6c53e5342f2e80d5d880a2cd8b699330e4d3a7f3")
+   # openssl /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_HASH_sha256('Hello World')","a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e")
+   # API     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_ECHO()","POST/date:2014-12-26T10:32:55Zhost:email.us-east-1.amazonaws.comdate;host5e0b51688a7b827b72b79952599b6a3004088d430b83b8c8a7895a215faceb21|AWS4-HMAC-SHA25620141226T103255Z20141226/us-east-1/ses/aws4_request5ea7df43c1e6de2767eed7955b3b03534bc8ca20ad79c1a44db371c0e1a09ff4|HEX:3cb5a24581f4698a0fab29542bc3678b78cf9182ff29f2a012c0a0201519ebbd|AWS4-HMAC-SHA256 Credential=xxxxxxxxxxxxxxxxxxxx/20141226/us-east-1/ses/aws4_request, SignedHeaders=Date;Host, Signature=3cb5a24581f4698a0fab29542bc3678b78cf9182ff29f2a012c0a0201519ebbd")
+   # Time    /#  COMMANDS=UNITTEST_cmd(commands,"curl('http://clearimageonline.com/app/timeapi/now',0,'GET','','')",nowUTC())
+   x=UNITTEST_runcommands(COMMANDS)
+  else
+   x='ERROR' x[1]='FAIL' x[2]='Amazon API library not installed'
+  /if
+  return x /return
+ /function
+ x=test()
+^)
+
+
+
+addunittest('AmazonAPI.echo()','Verify private Amazon API function calls are working.',^
+ if isfile('/apps/api/amazon/amazon.lib') then expand file='/apps/api/amazon/amazon.lib' /expand /if
+ function test() locals x,commands do
+  if isfile('/apps/api/amazon/amazon.lib') then
+   COMMANDS='ERROR'
+   # echo    /#  COMMANDS=UNITTEST_cmd(commands,"trim(system('"+amazon_api_echo+" Terry Riegel'))","Terry Riegel")
+   x=UNITTEST_runcommands(COMMANDS)
+  else
+   x='ERROR' x[1]='FAIL' x[2]='Amazon API library not installed'
+  /if
+  return x /return
+ /function
+ x=test()
+^)
+
+
+addunittest('AmazonAPI.base64()','Verify private Amazon API function calls are working.',^
+ if isfile('/apps/api/amazon/amazon.lib') then expand file='/apps/api/amazon/amazon.lib' /expand /if
+ function test() locals x,commands do
+  if isfile('/apps/api/amazon/amazon.lib') then
+   COMMANDS='ERROR'
+   # base64  /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_BASE64('Hello World')","SGVsbG8gV29ybGQ=")
+   x=UNITTEST_runcommands(COMMANDS)
+  else
+   x='ERROR' x[1]='FAIL' x[2]='Amazon API library not installed'
+  /if
+  return x /return
+ /function
+ x=test()
+^)
+
+
+addunittest('AmazonAPI.xxd()','Verify private Amazon API function calls are working.',^
+ if isfile('/apps/api/amazon/amazon.lib') then expand file='/apps/api/amazon/amazon.lib' /expand /if
+ function test() locals x,commands do
+  if isfile('/apps/api/amazon/amazon.lib') then
+   COMMANDS='ERROR'
+   # xxd     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_BASE64('HEX:48656c6c6f20576f726c64')","SGVsbG8gV29ybGQ=")
+   x=UNITTEST_runcommands(COMMANDS)
+  else
+   x='ERROR' x[1]='FAIL' x[2]='Amazon API library not installed'
+  /if
+  return x /return
+ /function
+ x=test()
+^)
+
+
+addunittest('AmazonAPI.openssl()','Verify private Amazon API function calls are working.',^
+ if isfile('/apps/api/amazon/amazon.lib') then expand file='/apps/api/amazon/amazon.lib' /expand /if
+ function test() locals x,commands do
+  if isfile('/apps/api/amazon/amazon.lib') then
+   COMMANDS='ERROR'
+   # xxd     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_ASHEX('Hello World')","HEX:48656c6c6f20576f726c64")
+   # xxd     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_HMAC_sha1('secretkey','Hello World')","HEX:4222bbf4506fb877932c94fa4b35784f58e76bfc")
+   # xxd     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_HMAC_sha256('secretkey','Hello World')","HEX:ce5cc4cf818ebb370d616baa6c53e5342f2e80d5d880a2cd8b699330e4d3a7f3")
+   # openssl /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_HASH_sha256('Hello World')","a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e")
+   x=UNITTEST_runcommands(COMMANDS)
+  else
+   x='ERROR' x[1]='FAIL' x[2]='Amazon API library not installed'
+  /if
+  return x /return
+ /function
+ x=test()
+^)
+
+
+addunittest('AmazonAPI.API()','Verify private Amazon API function calls are working.',^
+ if isfile('/apps/api/amazon/amazon.lib') then expand file='/apps/api/amazon/amazon.lib' /expand /if
+ function test() locals x,commands do
+  if isfile('/apps/api/amazon/amazon.lib') then
+   COMMANDS='ERROR'
+   # API     /#  COMMANDS=UNITTEST_cmd(commands,"AMAZON_ECHO()","POST/date:2014-12-26T10:32:55Zhost:email.us-east-1.amazonaws.comdate;host5e0b51688a7b827b72b79952599b6a3004088d430b83b8c8a7895a215faceb21|AWS4-HMAC-SHA25620141226T103255Z20141226/us-east-1/ses/aws4_request5ea7df43c1e6de2767eed7955b3b03534bc8ca20ad79c1a44db371c0e1a09ff4|HEX:3cb5a24581f4698a0fab29542bc3678b78cf9182ff29f2a012c0a0201519ebbd|AWS4-HMAC-SHA256 Credential=xxxxxxxxxxxxxxxxxxxx/20141226/us-east-1/ses/aws4_request, SignedHeaders=Date;Host, Signature=3cb5a24581f4698a0fab29542bc3678b78cf9182ff29f2a012c0a0201519ebbd")
+   x=UNITTEST_runcommands(COMMANDS)
+  else
+   x='ERROR' x[1]='FAIL' x[2]='Amazon API library not installed'
+  /if
+  return x /return
+ /function
+ x=test()
+^)
+
+
+addunittest('timeUTC()','Verify private Amazon API function calls are working.',^
+ if isfile('/apps/api/amazon/amazon.lib') then expand file='/apps/api/amazon/amazon.lib' /expand /if
+ function test() locals x,commands do
+  if isfile('/apps/api/amazon/amazon.lib') then
+   COMMANDS='ERROR'
+   # Time    /#  COMMANDS=UNITTEST_cmd(commands,"curl('http://clearimageonline.com/app/timeapi/now',0,'GET','','')",nowUTC())
+   x=UNITTEST_runcommands(COMMANDS)
+  else
+   x='ERROR' x[1]='FAIL' x[2]='Amazon API library not installed'
+  /if
+  return x /return
+ /function
+ x=test()
+^)
+
+
+
+
+
+
+
+
+temp=AMAZON_getcredentials()
+amazon_api_zone=temp[1]
+amazon_api_id  =temp[2]
+amazon_api_key =temp[3]
+temp='ERROR'
+
+
+>>
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8">
+  <title>API Details</title>
+  <script src="/apps/clear/clear.js"></script>
+  <script>
+   CLEAR.f.runOverlay('<<getlink('echo')>>');
+  </script>
+  <style>
+   dl.inline dd {
+    display: inline;
+    margin-left:5px;
+   }
+   dl.inline dd:after{
+    display: block;
+    content: '';
+    margin:0;
+   }
+   dl.inline dt{
+    display: inline-block;
+    min-width: 250px;
+    text-align:right;
+    margin:5px;
+   }
+   input[type=text] {width:390px;}
+  </style>
+ </head>
+ <body>
+  <a href="index.html">return</a><hr>
+  <h1>Amazon API</h1>
+  <h2>Testing this system</h2>
+  <div id="message"></div>
+  <dl class="inline">
+   <dt>echo</dt>    <dd id="ID_echo"></dd>
+   <dt>base64</dt>  <dd id="ID_base64"></dd>
+   <dt>xxd</dt>     <dd id="ID_xxd"></dd>
+   <dt>openssl</dt> <dd id="ID_openssl"></dd>
+   <dt>API</dt>     <dd id="ID_api"></dd>
+   <dt>ses</dt>     <dd id="ID_ses"></dd>
+   <dt>time</dt>    <dd id="ID_time"></dd>
+   <dt>Domain</dt>  <dd id="ID_domain"></dd>
+  </dl>
+ </body>
+</html>
+
+<<overlay echo cmd='echo'
+a=rununittest('AmazonAPI.'+cmd+'()')
+if a[1]='FAIL' then a[1]='<a href="'+getlink('systemfiles.html')+'">'+a[1]+'</a>' a[2]=a[2]+'<pre>'+ci_ttable(a)+'</pre>' /if
+writehtml('ID_'+cmd,a[1])
+writehtml('message',a[2])
+if a[1]='PASS' then runSCRIPT(^CLEAR.f.runOverlay('^+getlink("base64")+^');^) /if
+endOverlay()
+>>
+
+
+
+
+
+
+
+
+
+<<overlay base64 cmd='base64'
+a=rununittest('AmazonAPI.'+cmd+'()')
+if a[1]='FAIL' then a[1]='<a href="'+getlink('systemfiles.html')+'">'+a[1]+'</a>' a[2]=a[2]+'<pre>'+ci_ttable(a)+'</pre>' /if
+writehtml('ID_'+cmd,a[1])
+writehtml('message',a[2])
+if a[1]='PASS' then runSCRIPT(^CLEAR.f.runOverlay('^+getlink("xxd")+^');^) /if
+endOverlay()
+>>
+
+
+
+
+
+
+
+
+
+<<overlay xxd cmd='xxd'
+a=rununittest('AmazonAPI.'+cmd+'()')
+if a[1]='FAIL' then a[1]='<a href="'+getlink('systemfiles.html')+'">'+a[1]+'</a>' a[2]=a[2]+'<pre>'+ci_ttable(a)+'</pre>' /if
+writehtml('ID_'+cmd,a[1])
+writehtml('message',a[2])
+if a[1]='PASS' then runSCRIPT(^CLEAR.f.runOverlay('^+getlink("openssl")+^');^) /if
+endOverlay()
+>>
+
+
+
+
+
+
+
+
+
+
+<<overlay openssl cmd='openssl'
+a=rununittest('AmazonAPI.'+cmd+'()')
+if a[1]='FAIL' then a[1]='<a href="'+getlink('systemfiles.html')+'">'+a[1]+'</a>' a[2]=a[2]+'<pre>'+ci_ttable(a)+'</pre>' /if
+writehtml('ID_'+cmd,a[1])
+writehtml('message',a[2])
+if a[1]='PASS' then runSCRIPT(^CLEAR.f.runOverlay('^+getlink("api")+^');^) /if
+endOverlay()
+>>
+
+
+
+
+
+
+
+
+
+
+<<overlay api cmd='api'
+a=rununittest('AmazonAPI.'+cmd+'()')
+if a[1]='FAIL' then a[1]=a[1]+' Programming bug. Report to riegel@clearimageonline.com' a[2]=a[2]+'<pre>'+ci_ttable(a)+'</pre>' /if
+writehtml('ID_'+cmd,a[1])
+writehtml('message',a[2])
+if a[1]='PASS' then runSCRIPT(^CLEAR.f.runOverlay('^+getlink("ses")+^');^) /if
+endOverlay()
+>>
+
+
+
+
+
+
+
+
+
+
+<<overlay ses cmd='ses'
+b=AMAZON_verify_emailidentity('bob@example.com')
+if left(b,35)="<VerifyEmailIdentityResponse xmlns=" then
+ a='ERROR' a[1]='PASS' a[2]='SES Authentication passed'
+elif left(b,22)='<ErrorResponse xmlns="' then
+ a='ERROR' a[1]='FAIL' a[2]='SES Authentication Failure'
+else
+ a='ERROR' a[1]='FAIL' a[2]='SES Connection Failure'
+/if
+if a[1]='FAIL' then a[2]=a[2]+'<pre>'+viewsource(b)+'</pre>' a[1]='<a href="'+getlink('credentials.html')+'">'+a[1]+'</a>' /if
+writehtml('ID_'+cmd,a[1])
+writehtml('message',a[2])
+if a[1]='PASS' then runSCRIPT(^CLEAR.f.runOverlay('^+getlink("time")+^');^) /if
+endOverlay()
+>>
+
+
+
+
+
+
+
+
+
+<<overlay time cmd='time'
+a=rununittest('timeUTC()')
+b=a[2]
+if a[1]='FAIL' then b=viewsource(a[2,2]) a[1]=a[1]+" Time Failure. timeUTC() doesn't match external time server. May be temporary." /if
+writehtml('ID_'+cmd,a[1])
+writehtml('message',b)
+if a[1]='PASS' then runSCRIPT(^CLEAR.f.runOverlay('^+getlink("domain")+^');^) /if
+endOverlay()
+>>
+
+
+
+
+
+
+
+
+
+
+<<overlay domain cmd='domain'
+a=AMAZON_GetIdentityVerificationAttributes(nakeddomain(domainname))
+if count(a,'<VerificationStatus>Success</VerificationStatus>')>0 then
+ a='ERROR' a[1]='PASS' a[2]='Domain Verification passed'
+else
+ a='ERROR' a[1]='FAIL' a[2]='Domain Verification Failed'
+/if
+if a[1]='FAIL' then a[1]='<a href="'+getlink('verifydomain.html')+'">'+a[1]+'</a>' /if
+writehtml('ID_'+cmd,a[1])
+writehtml('message',a[2])
+if a[1]='PASS' then Amazon_all_tests_passed='TRUE' writeHTML('message',^Everything Looks Good. Now try a <a href="^+getlink('testemail.html')+^">test email</a>.^) /if
+endOverlay()
+>>
+
+
+
+
+

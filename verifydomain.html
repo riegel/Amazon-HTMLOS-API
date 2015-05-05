@@ -1,0 +1,36 @@
+<<
+expand file="/system/clearimage/DLL.lib" /expand
+
+temp=AMAZON_verify_domain(nakeddomain(domainname))
+>>
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8">
+  <title></title>
+ </head>
+ <body>
+  <a href="index.html">Home</a> | <a href="testemail.html">Test Email</a> | <a href="verifydomain.html">verify domain</a> | <a href="<<iconpage>>">Desktop</a><hr>
+  <h1>Domain Verification</h1>
+  <p>To use <<nakeddomain(domainname)>> it must first be verified with Amazon SES.</p>
+  <p>Add the following TXT record to the DNS for this domain</p>
+
+  <table border="1" cellpadding="5">
+   <tr><th>Name</th><th>Type</th><th>Value</th></tr>
+   <tr><td>_amazonses.<<nakeddomain(domainname)>></td><td>TXT</td><td><<temp>></td></tr>
+  </table>
+  <h3>Domain Verification Status</h3>
+<<
+     a=AMAZON_GetIdentityVerificationAttributes(nakeddomain(domainname))
+     if count(a,'<VerificationStatus>Success</VerificationStatus>')>0 then
+      display ^<h4>Verified</h4>^ /display
+     elif count(a,'<VerificationStatus>Pending</VerificationStatus>')>0 then
+      display ^<h4>Pending</h4>^ /display
+     else
+      display ^<h4>Not Verified</h4>^ /display
+     /if
+>>
+<h5>Raw Verification Response</h5>
+<pre><<viewsource(a)>></pre>
+ </body>
+</html>

@@ -1,0 +1,264 @@
+
+
+
+
+
+
+
+function AMAZON_send_email(fromaddress,toaddress,thesubject,thecontent) locals AWSZone,AccessKeyID,SecretAccessKey,temp,thenow,thehost,SignedHeaders,header,THEHTTPCONTENT,r,x,qq do
+ ## START DATA ########################### /#
+  temp=AMAZON_getcredentials()
+  AWSZone=temp[1]
+  AccessKeyID=temp[2]
+  SecretAccessKey=temp[3]
+  thenow=nowUTC()+':'+right('X00'+tagresults[7],2)
+  thehost='email.'+AWSZone+'.amazonaws.com'
+  header='ERROR'
+  header[1,1]='Host'           header[2,1]=thehost
+  header[1,2]='Date'           header[2,2]=moment(thenow,'YYYY-MM-DD[T]HH:mm:ss[Z]')
+  header[1,3]='Content-Type'   header[2,3]='application/x-www-form-urlencoded; charset=utf-8'
+  SignedHeaders='Date;Host'
+ ## END DATA ########################### /#
+ THEHTTPCONTENT=
+   'Action=SendEmail'+'&'+
+   'AWSAccessKeyId='+AccessKeyID+'&'+
+   'Destination.ToAddresses.member.1='+postprep(toaddress)+'&'+
+   'Message.Body.Text.Data='+postprep(thecontent)+'&'+
+   'Message.Subject.Data='+postprep(thesubject)+'&'+
+   'Source='+postprep(fromaddress)+'&'+
+   'Timestamp='+postprep(moment(thenow,'YYYY-MM-DD[]THH:mm:ss.000[Z]'))+'&'+
+   'Version=2010-12-01'
+ r=AMAZON_UNIVERSAL_AWS_Authorize('POST','/','',header,SignedHeaders,THEHTTPCONTENT,thenow,AWSZone,'ses',SecretAccessKey,AccessKeyID)
+ x='ERROR' x[1]='Authorization' x[2]=r[4]
+ header=appends(header,x)
+ temp=  curl('https://'+thehost+'/',0         ,'POST',THEHTTPCONTENT,AMAZON_serialize(header))
+ if count(temp,'<SendEmailResult>')=0 then
+  append now+' '+fromaddress+' SEND EMAIL NOT VERIFIED'+lf to file="/apps/cron/control/emailfailure.log" /append
+ /if
+ return temp /return
+/function
+
+
+
+
+
+
+function AMAZON_send_Raw_email(fromaddress,toaddress,thecontent) locals AWSZone,AccessKeyID,SecretAccessKey,temp,thenow,thehost,SignedHeaders,header,THEHTTPCONTENT,r,x,y,thefile,response do
+ ## START DATA ########################### /#
+  temp=AMAZON_getcredentials()
+  AWSZone=temp[1]
+  AccessKeyID=temp[2]
+  SecretAccessKey=temp[3]
+  thenow=nowUTC()+':'+right('X00'+tagresults[7],2)
+  thehost='email.'+AWSZone+'.amazonaws.com'
+  header='ERROR'
+  header[1,1]='Host'           header[2,1]=thehost
+  header[1,2]='Date'           header[2,2]=moment(thenow,'YYYY-MM-DD[T]HH:mm:ss[Z]')
+  header[1,3]='Content-Type'   header[2,3]='application/x-www-form-urlencoded; charset=utf-8'
+  SignedHeaders='Date;Host'
+ ## END DATA ########################### /#
+
+ x='ERROR'
+ x[1]=idgen()
+ x[2]=fromaddress
+ x[3]=toaddress
+ x[4]=thecontent
+
+ toaddress=lower(toaddress)
+ sysmd('/user/email/sent/'+postprep(toaddress))
+ copy x to file='/user/email/sent/'+postprep(toaddress)+'/'+x[1]+'.email' ts="," /copy
+ sysfixprivate('/user/email/sent/'+postprep(toaddress)+'/'+x[1]+'.email')
+
+ thefile='/upload/base64encode-'+random(1000,9999)+'-'+random(1000,9999)+'.txt'
+ copy thecontent to file=thefile /copy
+ thecontent=base64encode(thefile)
+ sysrm(thefile)
+ THEHTTPCONTENT=
+   'Action=SendRawEmail'+'&'+
+   'AWSAccessKeyId='+AccessKeyID+'&'+
+   'Destinations.member.1='+postprep(toaddress)+'&'+
+   'Source='+postprep(fromaddress)+'&'+
+   'RawMessage.Data='+replaceall(replaceall(replaceall(thecontent,'+','%2B'),'/','%2F'),'=','%3D')+'&'+
+   'Timestamp='+postprep(moment(thenow,'YYYY-MM-DD[T]HH:mm:ss.000[Z]'))+'&'+
+   'Version=2010-12-01'
+
+ if length(THEHTTPCONTENT)<50000 then
+  # No need to invoke the file system to pass paramaters /#
+ else
+  copy THEHTTPCONTENT to file=thefile /copy
+  THEHTTPCONTENT='@'+thefile
+ /if
+ r=AMAZON_UNIVERSAL_AWS_Authorize('POST','/','',header,SignedHeaders,THEHTTPCONTENT,thenow,AWSZone,'ses',SecretAccessKey,AccessKeyID)
+ x='ERROR' x[1]='Authorization' x[2]=r[4]
+ header=appends(header,x)
+ response=  curl('https://'+thehost+'/',0         ,'POST',THEHTTPCONTENT,AMAZON_serialize(header))
+ response=response+lf+'CanonicalRequest'+lf+r[1]+lf+'StringToSign'+lf+r[2]+'TheSignature'+lf+r[3]+lf+'AuthorizationHeader'+lf+r[4]
+ if length(THEHTTPCONTENT)<50000 then
+
+ else
+  sysrm(thefile)
+ /if
+ if count(response,'<SendRawEmailResult>')=0 then 
+  append now+' '+fromaddress+' SEND RAW EMAIL NOT VERIFIED'+lf+response+lf+lf to file="/apps/cron/control/emailfailure.log" /append
+ /if
+
+ return response /return
+/function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function AMAZON_verify_domain(domain) locals AWSZone,AccessKeyID,SecretAccessKey,temp,thenow,thehost,SignedHeaders,header,THEHTTPCONTENT,r,x do
+
+ sleep(2000)
+
+ ## START DATA ########################### /#
+
+  temp=AMAZON_getcredentials()
+  AWSZone=temp[1]
+  AccessKeyID=temp[2]
+  SecretAccessKey=temp[3]
+
+  thenow=nowUTC()+':'+right('X00'+tagresults[7],2)
+  thehost='email.'+AWSZone+'.amazonaws.com'
+
+  header='ERROR'
+  header[1,1]='Host'           header[2,1]=thehost
+  header[1,2]='Date'           header[2,2]=moment(thenow,'YYYY-MM-DD[T]HH:mm:ss[Z]')
+  header[1,3]='Content-Type'   header[2,3]='application/x-www-form-urlencoded; charset=utf-8'
+
+  SignedHeaders='Date;Host'
+
+ ## END DATA ########################### /#
+
+ THEHTTPCONTENT=
+  'Action=VerifyDomainIdentity'+'&'+
+  'AWSAccessKeyId='+AccessKeyID+'&'+
+  'Domain='+postprep(domain)+'&'+
+  'Timestamp='+postprep(moment(thenow,'YYYY-MM-DDTHH:mm:ss.000[Z]'))+'&'+
+  'Version=2010-12-01'
+
+ r=AMAZON_UNIVERSAL_AWS_Authorize('POST','/','',header,SignedHeaders,THEHTTPCONTENT,thenow,AWSZone,'ses',SecretAccessKey,AccessKeyID)
+ x='ERROR' x[1]='Authorization' x[2]=r[4]
+ header=appends(header,x)
+
+ temp=  curl('https://'+thehost+'/',0         ,'POST',THEHTTPCONTENT,AMAZON_serialize(header))
+
+ if count(temp,'<VerificationToken>')=1 then
+  temp=replace(chopright(chopchopleft(temp,'<VerificationToken>'),'</VerificationToken>'),'</VerificationToken>','')
+ else
+  temp='ERROR'
+ /if
+
+ return temp /return
+
+/function
+
+
+
+
+
+function AMAZON_verify_emailidentity(emailaddress) locals AWSZone,AccessKeyID,SecretAccessKey,temp,thenow,thehost,SignedHeaders,header,THEHTTPCONTENT,r,x do
+
+ sleep(2000)
+
+ ## START DATA ########################### /#
+
+  temp=AMAZON_getcredentials()
+  AWSZone=temp[1]
+  AccessKeyID=temp[2]
+  SecretAccessKey=temp[3]
+
+  thenow=nowUTC()+':'+right('X00'+tagresults[7],2)
+  thehost='email.'+AWSZone+'.amazonaws.com'
+
+  header='ERROR'
+  header[1,1]='Host'           header[2,1]=thehost
+  header[1,2]='Date'           header[2,2]=moment(thenow,'YYYY-MM-DD[T]HH:mm:ss[Z]')
+  header[1,3]='Content-Type'   header[2,3]='application/x-www-form-urlencoded; charset=utf-8'
+
+  SignedHeaders='Date;Host'
+
+ ## END DATA ########################### /#
+
+ THEHTTPCONTENT=
+  'Action=VerifyEmailIdentity'+'&'+
+  'AWSAccessKeyId='+AccessKeyID+'&'+
+  'EmailAddress='+postprep(emailaddress)+'&'+
+  'Timestamp='+postprep(moment(thenow,'YYYY-MM-DDTHH:mm:ss.000[Z]'))+'&'+
+  'Version=2010-12-01'
+
+ r=AMAZON_UNIVERSAL_AWS_Authorize('POST','/','',header,SignedHeaders,THEHTTPCONTENT,thenow,AWSZone,'ses',SecretAccessKey,AccessKeyID)
+ x='ERROR' x[1]='Authorization' x[2]=r[4]
+ header=appends(header,x)
+
+ temp=  curl('https://'+thehost+'/',0         ,'POST',THEHTTPCONTENT,AMAZON_serialize(header))
+
+ return temp /return
+/function
+
+
+
+
+
+
+
+
+
+
+function AMAZON_GetIdentityVerificationAttributes(identity) locals AWSZone,AccessKeyID,SecretAccessKey,temp,thenow,thehost,SignedHeaders,header,THEHTTPCONTENT,r,x do
+
+ sleep(2000)
+
+ ## START DATA ########################### /#
+
+  temp=AMAZON_getcredentials()
+  AWSZone=temp[1]
+  AccessKeyID=temp[2]
+  SecretAccessKey=temp[3]
+
+  thenow=nowUTC()+':'+right('X00'+tagresults[7],2)
+  thehost='email.'+AWSZone+'.amazonaws.com'
+
+  header='ERROR'
+  header[1,1]='Host'           header[2,1]=thehost
+  header[1,2]='Date'           header[2,2]=moment(thenow,'YYYY-MM-DD[T]HH:mm:ss[Z]')
+  header[1,3]='Content-Type'   header[2,3]='application/x-www-form-urlencoded; charset=utf-8'
+
+  SignedHeaders='Date;Host'
+
+ ## END DATA ########################### /#
+
+ THEHTTPCONTENT=
+  'Action=GetIdentityVerificationAttributes'+'&'+
+  'AWSAccessKeyId='+AccessKeyID+'&'+
+  'Identities.member.1='+postprep(identity)+'&'+
+  'Timestamp='+postprep(moment(thenow,'YYYY-MM-DDTHH:mm:ss.000[Z]'))+'&'+
+  'Version=2010-12-01'
+
+ r=AMAZON_UNIVERSAL_AWS_Authorize('POST','/','',header,SignedHeaders,THEHTTPCONTENT,thenow,AWSZone,'ses',SecretAccessKey,AccessKeyID)
+ x='ERROR' x[1]='Authorization' x[2]=r[4]
+ header=appends(header,x)
+
+ temp=  curl('https://'+thehost+'/',0         ,'POST',THEHTTPCONTENT,AMAZON_serialize(header))
+
+ return temp /return
+/function

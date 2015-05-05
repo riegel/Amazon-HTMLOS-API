@@ -1,0 +1,6 @@
+
+  amazon_api_echo="/bin/echo"
+  amazon_api_xxd="/usr/bin/xxd"
+  amazon_api_base64="/usr/bin/base64"
+  amazon_api_openssl="/usr/local/ssl/bin/openssl"
+ 

@@ -1,0 +1,38 @@
+<<
+expand file="/system/clearimage/DLL.lib" /expand
+>>
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8">
+  <title>API Details</title>
+  <style>
+   dl.inline dd {
+    display: inline;
+    margin-left:5px;
+   }
+   dl.inline dd:after{
+    display: block;
+    content: '';
+    margin:0;
+   }
+   dl.inline dt{
+    display: inline-block;
+    min-width: 250px;
+    text-align:right;
+    margin:5px;
+   }
+   input[type=text] {width:390px;}
+  </style>
+ </head>
+ <body>
+  <a href="index.html">Home</a> | <a href="testapi.html">Test API</a>  | <a href="testemail.html">Test Email</a> | <a href="verifydomain.html">verify domain</a> | <a href="<<iconpage>>">Desktop</a><hr>
+  <h1>Amazon API</h1>
+  <p>Welcome to the Amzon API.</p><p>To get started run the <a href="testapi.html">system tests</a> to be sure everything is working</p>
+  <<if Amazon_all_tests_passed='TRUE' then
+   display ^<h3>All tests passed</h3>^ /display
+  else
+   display ^<h3>-</h3>^ /display
+  /if>>
+ </body>
+</html>

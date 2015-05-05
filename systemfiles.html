@@ -1,0 +1,74 @@
+<<
+expand file="/system/clearimage/DLL.lib" /expand
+expand file="/apps/api/amazon/amazon.lib" /expand
+>>
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8">
+  <title>System Files</title>
+  <style>
+   dl.inline dd {
+    display: inline;
+    margin-left:5px;
+   }
+   dl.inline dd:after{
+    display: block;
+    content: '';
+    margin:0;
+   }
+   dl.inline dt{
+    display: inline-block;
+    min-width: 250px;
+    text-align:right;
+    margin:5px;
+   }
+   input[type=text] {width:390px;}
+  </style>
+ </head>
+ <body>
+  <a href="index.html">Cancel</a><hr>
+  <h1>Amazon API</h1>
+  <h1>System files needed for operation</h1>
+  <<
+   display ^
+  <form action="systemfiles" accept-charset="utf-8" AJAX>
+   <dl class="inline">
+    <dt>echo</dt>
+       <dd><input type="text" name="amazon_api_echo"></dd>
+    <dt>base64</dt>
+       <dd><input type="text" name="amazon_api_base64"></dd>
+    <dt>xxd</dt>
+       <dd><input type="text" name="amazon_api_xxd"></dd>
+    <dt>openssl</dt>
+       <dd><input type="text" name="amazon_api_openssl"></dd>
+    <dt></dt>
+       <dd><input type="submit" name="mybutton" value="submit"></dd>
+   </dl>
+  </form>^ /display
+  >>
+ </body>
+</html>
+
+<<overlay systemfiles
+ if amazon_api_echo='' or amazon_api_echo='ERROR' then
+  amazon_api_echo=replaceall('/'+ci_prefs[1,37]+'/echo','//','/')
+ /if
+ if amazon_api_xxd='' or amazon_api_xxd='ERROR' then
+  amazon_api_xxd='/usr/bin/xxd'
+ /if
+ if amazon_api_base64='' or amazon_api_base64='ERROR' then
+  amazon_api_base64='/usr/bin/base64'
+ /if
+ if amazon_api_openssl='' or amazon_api_openssl='ERROR' then
+  amazon_api_openssl='/usr/local/ssl/bin/openssl'
+ /if
+ config=^
+  amazon_api_echo="^+amazon_api_echo+^"
+  amazon_api_xxd="^+amazon_api_xxd+^"
+  amazon_api_base64="^+amazon_api_base64+^"
+  amazon_api_openssl="^+amazon_api_openssl+^"
+ ^
+ copy config to file="/apps/api/amazon/config.lib" /copy
+ goto 'index.html'
+>>

@@ -1,0 +1,26 @@
+1.0 04/07/2015 22:18 Initial Release
+1.01 04/07/2015 22:19 Initial Release added version history
+1.02 04/09/2015 19:14 Added preferences
+1.03 04/09/2015 20:07 Added support for UnitTests
+1.04 04/09/2015 20:10 Added support for UnitTests
+1.05 04/09/2015 20:15 Added support for UnitTests
+1.06 04/09/2015 20:32 Amazon API support
+1.07 04/09/2015 21:02 Amazon API support
+1.08 04/10/2015 13:26 UI Improvements
+1.09 04/10/2015 15:35 Added Test Email
+1.1 04/10/2015 16:53 UI Updates
+1.11 04/10/2015 16:55 UI Updates
+1.12 04/10/2015 17:21 Amazon API integration with email
+1.13 04/10/2015 17:22 Amazon API integration with email
+1.14 04/10/2015 17:26 Amazon API integration with email
+1.15 04/10/2015 17:39 Amazon API integration with email
+1.16 04/10/2015 17:42 Amazon API integration with email
+1.17 04/10/2015 17:43 Amazon API integration with email
+1.18 04/10/2015 17:44 Amazon API integration with email
+1.19 04/10/2015 17:46 Amazon API integration with email
+1.2 04/10/2015 17:51 Amazon API integration with email
+1.21 04/10/2015 17:53 Amazon API integration with email
+1.22 04/10/2015 17:54 Amazon API integration with email
+1.23 04/10/2015 20:47 Send Email Debug formatting
+1.24 04/13/2015 15:23 Reworked interface
+1.25 04/13/2015 17:17 Fixed email attach with &lt;file src="...">

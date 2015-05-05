@@ -1,0 +1,203 @@
+expand file="/apps/api/amazon/config.lib" /expand
+
+function AMAZON_BASE64(k) do
+ if left(k,4)='HEX:' then
+  k=replace(k,'HEX:','')
+  return trim(syscall('Twitter SHA1',amazon_api_echo+' -n "'+k+'" | '+amazon_api_xxd+' -r -p | '+amazon_api_base64)) /return
+ else
+  return trim(syscall('Twitter SHA1',amazon_api_echo+' -n "'+k+'" | '+amazon_api_base64)) /return
+ /if
+/function
+
+
+function AMAZON_ASHEX(k) do
+ if left(k,4)='HEX:' then
+  return k /return
+ else
+  return 'HEX:'+replaceall(replaceall(replaceall(trim(syscall('AS HEX',amazon_api_echo+" -n '"+k+"' | "+amazon_api_xxd+" -p")),' ',''),lf,''),cr,'') /return
+ /if
+/function
+
+
+
+function AMAZON_HMAC_sha1(k,t) do
+ if left(k,4)='HEX:' then
+  k=replace(k,'HEX:','')
+ else
+  k=replaceall(replaceall(replaceall(trim(syscall('AS HEX',amazon_api_echo+" -n '"+k+"' | "+amazon_api_xxd+" -p")),' ',''),lf,''),cr,'')
+ /if
+ return 'HEX:'+replace(trim(syscall('HMAC_SHA1',amazon_api_echo+' -n "'+t+'" | '+amazon_api_openssl+' dgst -sha1 -mac HMAC -macopt hexkey:'+k)),'(stdin)= ','') /return
+/function
+
+
+
+
+function AMAZON_HMAC_sha256(k,t) do
+ if left(k,4)='HEX:' then
+  k=replace(k,'HEX:','')
+ else
+  k=replaceall(replaceall(replaceall(trim(syscall('AS HEX',amazon_api_echo+" -n '"+k+"' | "+amazon_api_xxd+" -p")),' ',''),lf,''),cr,'')
+ /if
+ return 'HEX:'+replace(trim(syscall('AMAZON_HMAC_SHA256',amazon_api_echo+' -n "'+t+'" | '+amazon_api_openssl+' dgst -sha256 -mac HMAC -macopt hexkey:'+k)),'(stdin)= ','') /return
+/function
+
+
+
+
+function AMAZON_HASH_sha256(t) do
+ if left(t,1)='@' then 
+  return trim(chopleft(syscall('AMAZON_HASH_SHA256_FROM_FILE' ,amazon_api_openssl+' dgst -sha256 '+"'"+ci_getpath(replace(t,'@',''))+"'"        ),' ')) /return
+ else
+  return trim(chopleft(syscall('AMAZON_HASH_SHA256_FROM_PARAM',amazon_api_echo+' -n "'+t+'" | '+amazon_api_openssl+' dgst -sha256'  ),' ')) /return
+ /if
+/function
+
+
+
+
+function AMAZON_ECHO() locals AWSZone,AccessKeyID,SecretAccessKey,thenow,thehost,header,SignedHeaders,THEHTTPCONTENT,r do
+  # Dummy To see if we can connect, auth will fail  /#
+  # Do not change this as it is used for unit tests /#
+  AWSZone='us-east-1'
+  AccessKeyID='xxxxxxxxxxxxxxxxxxxx'
+  SecretAccessKey='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  thenow='12/26/2014 10:32:55'
+  thehost='email.'+AWSZone+'.amazonaws.com'
+  header='ERROR'
+  header[1,1]='Host'           header[2,1]=thehost
+  header[1,2]='Date'           header[2,2]=moment(thenow,'YYYY-MM-DD[T]HH:mm:ss[Z]')
+  header[1,3]='Content-Type'   header[2,3]='application/x-www-form-urlencoded; charset=utf-8'
+  SignedHeaders='Date;Host'
+  THEHTTPCONTENT=
+   'Action=VerifyEmailIdentity'+'&'+
+   'AWSAccessKeyId='+AccessKeyID+'&'+
+   'EmailAddress='+postprep('riegel@clearimageonline.com')+'&'+
+   'Timestamp='+postprep(moment(thenow,'YYYY-MM-DDTHH:mm:ss.000[Z]'))+'&'+
+   'Version=2010-12-01'
+  r=AMAZON_UNIVERSAL_AWS_Authorize('POST','/','',header,SignedHeaders,THEHTTPCONTENT,thenow,AWSZone,'ses',SecretAccessKey,AccessKeyID)
+  return replaceall(r[1]+'|'+r[2]+'|'+r[3]+'|'+r[4],lf,'') /return
+/function
+
+
+
+function AMAZON_CANONICAL_REQUEST(RequestMethod,URI,query,Headers,SignedHeaders,Content) locals RequestPayload,CanonicalHeader,CanonicalHeaders,sh,x,y,iq,q,CanonicalRequest do
+ RequestPayload=Content
+ canonicalHeader='ERROR'
+ sh=split(SignedHeaders,';')
+ for name=headers rowname=x do
+  for name=sh rowname=y do
+   if y[1]=x[1] then
+    x[1]=lower(x[1])
+    iq='ERROR'
+    for name=q value=1 to length(x[2]) do
+     if middle(x[2],q,q)='"' and iq='ERROR' then iq='TRUE' elif middle(x[2],q,q)='"' then iq='ERROR' /if
+     if middle(x[2],q,q)=' ' and iq='TRUE' then x[2]=left(x[2],q-1)+'~'+right(x[2],length(x[2])-q) /if
+    /for
+    x[2]=replaceall(trim(x[2]),'~',' ')
+    # x[2]=replaceall(x[2],' ','.') /#
+    canonicalHeader=appends(canonicalHeader,x)
+   /if
+  /for
+ /for
+ canonicalHeader=sortcol(canonicalHeader,1)
+ CanonicalHeaders=''
+ SignedHeaders=''
+ for name=canonicalHeader rowname=x do
+  CanonicalHeaders=CanonicalHeaders+x[1]+':'+x[2]+lf
+  SignedHeaders=SignedHeaders+x[1]+';'
+ /for
+ SignedHeaders=left(SignedHeaders,length(SignedHeaders)-1)`
+ CanonicalRequest =
+  RequestMethod+lf+
+  URI+lf+
+  query+lf+
+  CanonicalHeaders+lf+
+  SignedHeaders+lf+
+  AMAZON_HASH_sha256(RequestPayload)
+ return CanonicalRequest /return
+/function
+
+
+
+function AMAZON_CREDENTIALSCOPE(thedate,theregion,theservice) do
+ return moment(thedate,'YYYYMMDD')+'/'+theregion+'/'+theservice+'/aws4_request' /return
+/function
+
+
+
+function AMAZON_STRING_TO_SIGN(thedate,theregion,theservice,CanonicalRequest) locals RequestDate,HashedCanonicalRequest,StringToSign do
+ RequestDate=moment(thedate,'YYYYMMDD[T]HHmmss[Z]')
+ HashedCanonicalRequest=AMAZON_HASH_sha256(CanonicalRequest)
+ StringToSign=
+  'AWS4-HMAC-SHA256'+lf+
+  RequestDate+lf+
+  AMAZON_credentialscope(thedate,theregion,theservice)+lf+
+  HashedCanonicalRequest
+ return StringToSign /return
+/function
+
+
+
+function AMAZON_SIGNATURE(thedate,theregion,theservice,thekey,stringtosign) do
+ return AMAZON_HMAC_sha256(AMAZON_HMAC_sha256(AMAZON_HMAC_sha256(AMAZON_HMAC_sha256(AMAZON_HMAC_sha256("AWS4"+thekey,moment(thedate,'YYYYMMDD')),theregion),theservice),"aws4_request"),stringtosign) /return
+/function
+
+
+
+function AMAZON_UNIVERSAL_AWS_Authorize(RequestMethod,URI,QUERY,headers,SignedHeaders,Content,theDate,theregion,theservice,secretkey,accesskey) locals CanonicalRequest,StringToSign,theSignature,AuthorizationHeader,R do
+ CanonicalRequest=AMAZON_CANONICAL_REQUEST(RequestMethod,URI,QUERY,Headers,SignedHeaders,Content)
+  StringToSign=AMAZON_STRING_TO_SIGN(thedate,theregion,theservice,CanonicalRequest)
+   theSignature=AMAZON_SIGNATURE(thedate,theregion,theservice,SecretKey,StringToSign)
+    AuthorizationHeader=^AWS4-HMAC-SHA256 Credential=^+AccessKey+^/^+AMAZON_CredentialScope(thedate,theregion,theservice)+^, SignedHeaders=^+SignedHeaders+^, Signature=^+replace(thesignature,'HEX:','')
+ r='ERROR'
+ r[1]=CanonicalRequest
+ r[2]=StringToSign
+ r[3]=theSignature
+ r[4]=AuthorizationHeader
+ return r /return
+/function
+
+
+
+
+
+function AMAZON_serialize(header) locals x,text do
+ text=''
+ for name=header rowname=x do
+  if x[1]='Host' then
+   # Not needed here, it will be sent by Aestiva HTML/OS netweb /#
+  else
+   text=text+x[1]+': '+x[2]+cr+lf
+  /if
+ /for
+ return text /return
+/function
+
+
+
+
+
+
+
+
+function AMAZON_getcredentials() locals x,AWSZone,AccessKeyID,SecretAccessKey,temp do
+ if isfile("/apps/login/credentials/amazon.txt") then
+  copy file="/apps/login/credentials/amazon.txt" to temp /copy
+  $(temp)
+  x='ERROR'
+  x[1]=AWSZone
+  x[2]=AccessKeyID
+  x[3]=SecretAccessKey
+ else
+  x='ERROR'
+  x[1]='us-east-1'
+  x[2]='xxxxxxxxxxxxxxxxxxxx'
+  x[3]='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+ /if
+ return x /return
+/function
+
+
+
+
+expand file="/apps/api/amazon/ses.lib" /expand

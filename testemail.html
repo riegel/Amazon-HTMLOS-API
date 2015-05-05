@@ -1,0 +1,37 @@
+<<
+expand file="/system/clearimage/DLL.lib" /expand
+copy file="/system/conf/amazon.conf" ts="," to useamazon /copy
+if useamazon='TRUE' or useamazon=1 then useamazon=1 else useamazon='' /if
+>>
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8">
+  <title></title>
+ </head>
+ <body>
+  <a href="index.html">Home</a> | <a href="testemail.html">Test Email</a> | <a href="verifydomain.html">verify domain</a> | <a href="<<iconpage>>">Desktop</a><hr>
+  <h1>Amazon SES Email test</h1>
+  <<
+  if useamazon=1 then
+   display 'Using Amazon SES for outgoing mail' /display
+  else
+   display 'Using HTML/OS for outgoing email' /display
+  /if
+  >>
+  <form action="doit" accept-charset="utf-8">
+   <input type="checkbox" name="useamazon" value="1"> Use Amazon SES for outgoing mail<br>
+   <input type="text" name="testemail" style="width:300px;">
+   <input type="submit" name="mybutton" value="test">
+  </form>
+  <<message('')>>
+ </body>
+</html>
+<<overlay doit
+ if useamazon=1 then temp='TRUE' else temp='FALSE' /if
+ copy temp to file="/system/conf/amazon.conf" ts="," /copy
+ message('<pre>'+viewsource(
+  send_email('do-not-reply@'+nakeddomain(domainname),testemail,^This is the subject^,^<html><img src="/apps/api/amazon/logo.png"><hr><h1>Wooo! ¶ It Works.</h1>If you can read this then it is working.<file src="/apps/api/amazon/emailtest.pdf"></html>^)
+ )+'</pre>')
+ goto page
+>>
